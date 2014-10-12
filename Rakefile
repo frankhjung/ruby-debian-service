@@ -1,8 +1,11 @@
+# coding: utf-8
+
 require 'fpm'
 require 'rake/clean'
 require 'rdoc/task'
 require 'rubocop/rake_task'
 require_relative 'lib/builder'
+require_relative 'lib/packager'
 
 # Build Debian application package.
 #
@@ -32,44 +35,9 @@ PRE_INSTALL = File.expand_path 'src/main/resources/preinstall'
 
 # post-installation script (templated)
 POST_INSTALL_ERB = File.expand_path 'src/main/resources/postinstall.erb'
-POST_INSTALL = File.expand_path 'target/postinstall'
 
 # pre-un-installation script
 PRE_UNINSTALL = File.expand_path 'src/main/resources/preuninstall'
-
-# command to create package
-CONFIG = 'local'
-PACKAGE_COMMAND = ['fpm',
-                   '-s dir',
-                   '-t deb',
-                   '-n fhj-timer',
-                   '-v 0.2.0',
-                   "--iteration #{CONFIG}",
-                   '-a all',
-                   '-m frankhjung@linux.com',
-                   '--description "Simple debian service"',
-                   '-d "bash (>=4.3)"',
-                   '-d "chkconfig (>=11.4)"',
-                   '-d "curl (>=7.33)"',
-                   '-d "dash (>=0.5.7)"',
-                   '-d "grep (>=2.15)"',
-                   "--pre-install #{PRE_INSTALL}",
-                   "--post-install #{POST_INSTALL}",
-                   "--pre-uninstall #{PRE_UNINSTALL}",
-                   '--category Utility',
-                   '--vendor frankhjung',
-                   '--url "http://frankhjung.blogspot.com.au/"',
-                   '--verbose',
-                   '-C target',
-                   'etc/init.d',
-                   'opt/app'
-                  ]
-
-# command to check package creation
-CHECK_COMMAND = ['dpkg',
-                 '-I',
-                 'fhj-timer*.deb'
-                ]
 
 desc 'Show help'
 task :help do
@@ -87,30 +55,47 @@ To show gemsets use:
   rvm gemsets list
 
 HELP
-  system 'fpm --help'
+  # system 'fpm --help'
 end
 
 desc 'Generate target files from source and templates'
 task build: :clean do
-  properties_file = File.expand_path "src/main/config/#{CONFIG}/debian-service.properties"
-  # service
-  build = Builder.new
-  target_file = File.expand_path 'target/etc/init.d/fhj-timer'
-  build.copy_file(SERVICE, target_file)
-  # script - timer (sets sleep time)
-  target_file = File.expand_path 'target/opt/app/fhj-timer.sh'
-  build.from_template(SCRIPT, target_file, properties_file)
-  # script - postinstall (starts service if active)
-  build.from_template(POST_INSTALL_ERB, POST_INSTALL, properties_file)
+  builder = Builder.new
+  Dir.glob 'src/main/config/*' do |d|
+    @config = File.basename d
+    puts "Building for #{@config} ..."
+    properties_file = File.expand_path "src/main/config/#{@config}/debian-service.properties"
+    service_file = File.expand_path "target/#{@config}/etc/init.d/fhj-timer"
+    builder.copy_file(SERVICE, service_file)
+    script_file = File.expand_path "target/#{@config}/opt/app/fhj-timer.sh"
+    builder.from_template(SCRIPT, script_file, properties_file)
+    postinstall_file = File.expand_path "target/#{@config}/postinstall"
+    builder.from_template(POST_INSTALL_ERB, postinstall_file, properties_file)
+  end
 end
 
 desc 'Create Debian package using command line fpm'
 task package: :build do
-  # build package
-  rc = system PACKAGE_COMMAND.join(' ')
-  fail "ERROR: could not create package #{rc}" unless rc
-  # show information of built package
-  system CHECK_COMMAND.join(' ')
+  packager = Packager.new
+  Dir.glob 'src/main/config/*' do |d|
+    packager.iteration = File.basename d
+    packager.preinstall = PRE_INSTALL
+    packager.postinstall = File.expand_path "target/#{packager.iteration}/postinstall"
+    packager.preuninstall = PRE_UNINSTALL
+    packager.changedir = File.expand_path "target/#{packager.iteration}"
+    packager.pack
+    fail "ERROR: could not create package #{package.name}" unless packager.check
+  end
+end
+
+desc 'Check packages were built correctly'
+task :validate do
+  packager = Packager.new
+  Dir.glob 'src/main/config/*' do |d|
+    packager.iteration = File.basename d
+    puts "\nChecking package for #{packager.iteration} ..."
+    puts "\nERROR: bad package for #{packager.iteration}\n" unless packager.check
+  end
 end
 
 desc 'Show bundle and Gem information'
