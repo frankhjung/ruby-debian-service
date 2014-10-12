@@ -1,4 +1,17 @@
-# see defaults in https://github.com/bbatsov/rubocop/blob/master/config/default.yml
+# see defaults in
+# https://github.com/bbatsov/rubocop/blob/master/config/default.yml
+# inherit_from: .rubocop_todo.yml
+
+Style/Encoding:
+  Enabled: true
+
 Metrics/MethodLength:
   CountComments: false  # count full line comments?
   Max: 15
+
+Metrics/LineLength:
+  Max: 100
+  AllowURI: true
+  URISchemes:
+    - http
+    - https
