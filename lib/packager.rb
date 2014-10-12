@@ -9,7 +9,7 @@ require 'erb'
 # License:: see LICENSE
 class Packager
   # Version
-  VERSION = '0.2.0'
+  VERSION = '0.3.0'
   # template of command to create package
   FPM_TEMPLATE = ['fpm',
                   '-s dir',
