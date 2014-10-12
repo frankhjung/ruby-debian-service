@@ -2,6 +2,8 @@
 
 ==HEAD
 
+* added ERB templates to apply environment specific configuration
+
 ==0.1.0
 
 * initial release

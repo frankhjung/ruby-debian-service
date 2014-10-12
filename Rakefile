@@ -2,6 +2,7 @@ require 'fpm'
 require 'rake/clean'
 require 'rdoc/task'
 require 'rubocop/rake_task'
+require_relative 'lib/builder'
 
 # Build Debian application package.
 #
@@ -17,26 +18,33 @@ task default: [:help]
 task cleanall: [:clean, :clobber]
 task all: [:clean, :clobber, :check, :package, :doc]
 
-# path to sources
+# path to init.d service
 SERVICE = File.expand_path 'src/main/resources/fhj-timer-service.sh'
-SCRIPT = File.expand_path 'src/main/resources/fhj-timer-script.sh'
+
+# path to script run by service (templated)
+SCRIPT = File.expand_path 'src/main/resources/fhj-timer-script.sh.erb'
+
+# path to configuration properties
+CONFIG_DIR = File.expand_path 'src/main/config'
 
 # pre-installation script
 PRE_INSTALL = File.expand_path 'src/main/resources/preinstall'
 
-# post-installation script
-POST_INSTALL = File.expand_path 'src/main/resources/postinstall'
+# post-installation script (templated)
+POST_INSTALL_ERB = File.expand_path 'src/main/resources/postinstall.erb'
+POST_INSTALL = File.expand_path 'target/postinstall'
 
 # pre-un-installation script
 PRE_UNINSTALL = File.expand_path 'src/main/resources/preuninstall'
 
 # command to create package
+CONFIG = 'local'
 PACKAGE_COMMAND = ['fpm',
                    '-s dir',
                    '-t deb',
                    '-n fhj-timer',
                    '-v 0.1.0',
-                   '--iteration local',
+                   "--iteration #{CONFIG}",
                    '-a all',
                    '-m frankhjung@linux.com',
                    '--description "Simple debian service"',
@@ -82,16 +90,18 @@ HELP
   system 'fpm --help'
 end
 
-desc 'Copy source files to target'
+desc 'Generate target files from source and templates'
 task build: :clean do
+  properties_file = File.expand_path "src/main/config/#{CONFIG}/debian-service.properties"
   # service
-  target = File.expand_path 'target/etc/init.d/'
-  FileUtils.mkdir_p target
-  FileUtils.cp SERVICE, File.join(target, 'fhj-timer')
-  # timer
-  target = File.expand_path 'target/opt/app/'
-  FileUtils.mkdir_p target
-  FileUtils.cp SCRIPT, File.join(target, 'fhj-timer.sh')
+  build = Builder.new
+  target_file = File.expand_path 'target/etc/init.d/fhj-timer'
+  build.copy_file(SERVICE, target_file)
+  # script - timer (sets sleep time)
+  target_file = File.expand_path 'target/opt/app/fhj-timer.sh'
+  build.from_template(SCRIPT, target_file, properties_file)
+  # script - postinstall (starts service if active)
+  build.from_template(POST_INSTALL_ERB, POST_INSTALL, properties_file)
 end
 
 desc 'Create Debian package using command line fpm'
@@ -130,7 +140,7 @@ RuboCop::RakeTask.new(:check) do |task|
   # run standard syntax check first
   # ruby "-c #{srcs}"
   # files to check
-  task.patterns = ['Rakefile']
+  task.patterns = ['Rakefile', 'lib/*.rb']
   # report format: simple, progress, files, offenses, clang, disabled
   task.formatters = ['simple']
   # continue on finding errors

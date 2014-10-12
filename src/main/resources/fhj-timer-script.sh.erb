@@ -12,7 +12,7 @@
 #
 # * http://www.cyberciti.biz/tips/linux-write-sys-v-init-script-to-start-stop-service.html
 
-readonly SLEEP=30
+readonly SLEEP=<%= properties['debian.service.sleep.time'] %>
 readonly HOSTNAME=$(hostname -f)
 readonly URL="http://${HOSTNAME}/localhost/dokuwiki/doku.php?id=start"
 
