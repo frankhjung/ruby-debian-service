@@ -2,6 +2,12 @@
 
 ==HEAD
 
+==0.3.0
+
+* move package build into its own class
+* iterate through known environments
+* update rubocop rules
+
 ==0.2.0
 
 * added ERB templates to apply environment specific configuration
