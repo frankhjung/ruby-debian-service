@@ -1,0 +1,3 @@
+#!/bin/sh
+/sbin/chkconfig --add fhj-timer
+service fhj-timer start

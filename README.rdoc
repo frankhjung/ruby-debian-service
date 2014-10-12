@@ -1,0 +1,24 @@
+= Example Debian Service
+
+This is an example project to show how to use Ruby to create a Debian package.
+
+== Purpose
+
+This is an example Debian package project. 
+The application is simple, it will:
+ 
+* log a message to system logger (<tt>/var/log/messages</tt>)
+* then sleep for 30 seconds
+
+It will do this forever until you force it to stop.
+
+== References
+
+* {ERB Templates}[http://ruby-doc.org/stdlib-1.9.3/libdoc/erb/rdoc/ERB.html]
+* {ERB Templates Introduction}[http://www.stuartellis.eu/articles/erb/]
+* {FPM Package Utility}[https://github.com/jordansissel/fpm]
+* {Rakefile}[http://www.ruby-doc.org/core-1.9.3/doc/rake/rakefile_rdoc.html]
+* {RDoc}[http://rdoc.sourceforge.net/doc/]
+* {RuboCop Rakefile integration}[https://github.com/bbatsov/rubocop#rake-integration]
+* {Rubucop}[https://github.com/bbatsov/rubocop=end]
+

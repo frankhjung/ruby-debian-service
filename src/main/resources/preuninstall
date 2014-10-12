@@ -1,0 +1,3 @@
+#!/bin/sh
+service fhj-timer stop &>/dev/null || :
+/sbin/chkconfig --del fhj-timer

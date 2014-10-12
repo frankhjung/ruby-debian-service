@@ -1,0 +1,6 @@
+#!/bin/sh
+if [ -x /etc/init.d/fhj-timer ]
+then
+    /etc/init.d/fhj-timer stop
+fi
+exit 0

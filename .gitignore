@@ -1,0 +1,9 @@
+*~
+*.bak
+*.deb
+*.gem
+Gemfile.lock
+*.html
+rdocs/
+.*.swp
+target/
