@@ -9,6 +9,19 @@ require_relative 'properties'
 # Author:: Frank Jung
 # License:: see LICENSE
 class Builder
+  # path to init.d service
+  SERVICE = File.expand_path 'src/main/resources/fhj-timer-service.sh'
+  # path to script run by service (templated)
+  SCRIPT = File.expand_path 'src/main/resources/fhj-timer-script.sh.erb'
+  # path to configuration properties
+  CONFIG_DIR = File.expand_path 'src/main/config'
+  # pre-installation script
+  PRE_INSTALL = File.expand_path 'src/main/resources/preinstall'
+  # post-installation script (templated)
+  POST_INSTALL_ERB = File.expand_path 'src/main/resources/postinstall.erb'
+  # pre-un-installation script
+  PRE_UNINSTALL = File.expand_path 'src/main/resources/preuninstall'
+
   # Copy file as is from source to target.
   def copy_file(source_file, target_file)
     fail "ERROR: #{source_file} not a file" unless File.file?(source_file)
