@@ -16,9 +16,11 @@ class Properties
   end
 
   # expose private ERB binding method.
-  def get_binding
+  def binding
     binding
   end
+
+  alias_method :get_binding, :binding
 
   private
 
