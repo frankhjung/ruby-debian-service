@@ -41,7 +41,7 @@ To cleanup unused Gems use:
 
 To show gemsets use:
 
-  rvm gemsets list
+  rvm gemset list
 
 Version:
 
