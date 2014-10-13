@@ -20,11 +20,10 @@ class Packager
                   '-a all',
                   '-m frankhjung@linux.com',
                   '--description "Simple debian service"',
-                  '-d "bash (>=4.3)"',
-                  '-d "chkconfig (>=11.4)"',
-                  '-d "curl (>=7.33)"',
-                  '-d "dash (>=0.5.7)"',
-                  '-d "grep (>=2.15)"',
+                  '-d "bash > 4.3"',
+                  '-d "chkconfig > 11.4"',
+                  '-d "curl > 7.33"',
+                  '-d "dash > 0.5.7"',
                   '--pre-install <%= @preinstall %>',
                   '--post-install <%= @postinstall %>',
                   '--pre-uninstall <%= @preuninstall %>',
@@ -52,7 +51,7 @@ class Packager
 
   # Returns with the expected package name
   def name
-    return "fhj-timer_#{VERSION}-#{@iteration}_all.deb"
+    "fhj-timer_#{VERSION}-#{@iteration}_all.deb"
   end
 
   # Package for a specific environment configuration
