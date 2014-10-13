@@ -84,7 +84,8 @@ task package: :build do
     packager.preuninstall = PRE_UNINSTALL
     packager.changedir = File.expand_path "target/#{packager.iteration}"
     packager.pack
-    fail "ERROR: could not create package #{package.name}" unless packager.check
+    fail "ERROR: could not create package #{packager.name}" unless packager.check
+    FileUtils.mv packager.name, 'target'
   end
 end
 
