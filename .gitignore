@@ -1,6 +1,7 @@
 *~
 *.bak
 *.deb
+doc/
 *.gem
 Gemfile.lock
 *.html
