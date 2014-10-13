@@ -147,5 +147,5 @@ RDoc::Task.new(:doc) do |task|
   task.title = ENV['title'] || 'Ruby example to generate a Debian package'
 end
 
-CLEAN.include('fhj-timer*.deb')
+CLEAN.include('fhj-timer*.deb', 'target/*.deb')
 CLOBBER.include('doc/', 'target/', '**/*.bak', '**/*~')
