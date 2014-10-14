@@ -14,24 +14,21 @@ VERSION = 'SNAPSHOT'
 
 task default: [:help]
 task cleanall: [:clean, :clobber]
-task all: [:clean, :clobber, :check, :package, :doc]
+task all: [:cleanall, :check, :build, :package, :publish, :doc]
 
 desc 'Show help'
 task :help do
   puts <<HELP
-The main goals are
+The main goals are:
 
   * build - build target files from templates
-  * package - create RPM package from targets
-  * publish - upload RPM packages to WebDAV
+  * package - create Debian package from targets
+  * publish - upload Debian packages to WebDAV
 
 For Rakefile help call:
 
-  rake -D
+  rake [-D|-T]
 
-Or
-
-  rake -T
 To show Ruby environment use:
 
   go.sh info
@@ -52,15 +49,8 @@ HELP
   # system 'fpm --help'
 end
 
-desc 'Generate target files from source and templates'
-task build: [:clean, :check] do
-  Dir.glob 'src/main/env/*' do |env|
-    builder = Builder.new
-    @environment = File.basename env
-    puts "Building #{@environment} ..."
-    builder.build @environment
-  end
-end
+CLEAN.include('fhj-timer*.deb', 'target/*.deb')
+CLOBBER.include('doc/', 'target/', '**/*.bak', '**/*~')
 
 desc 'Check project syntax with RuboCop'
 RuboCop::RakeTask.new(:check) do |task|
@@ -74,6 +64,16 @@ RuboCop::RakeTask.new(:check) do |task|
   task.fail_on_error = false
   # show it working
   task.verbose = true
+end
+
+desc 'Generate target files from source and templates'
+task :build do
+  Dir.glob 'src/main/env/*' do |env|
+    builder = Builder.new
+    @environment = File.basename env
+    puts "Building #{@environment} ..."
+    builder.build @environment
+  end
 end
 
 desc 'package installation files for each environment'
@@ -131,6 +131,3 @@ RDoc::Task.new(:doc) do |task|
   # task.rdoc_files.include('VERSION')
   task.title = ENV['title'] || 'Ruby example to generate a Debian package'
 end
-
-CLEAN.include('fhj-timer*.deb', 'target/*.deb')
-CLOBBER.include('doc/', 'target/', '**/*.bak', '**/*~')
