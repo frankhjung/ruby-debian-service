@@ -2,6 +2,12 @@
 
 ==HEAD
 
+==0.4.0
+
+* move constants out of Rakefile and into class
+* added method to get environment from package name
+* added WebDAV publisher
+
 ==0.3.0
 
 * move package build into its own class

@@ -7,7 +7,7 @@ Style/Encoding:
 
 Metrics/MethodLength:
   CountComments: false  # count full line comments?
-  Max: 15
+  Max: 20
 
 Metrics/LineLength:
   Max: 100

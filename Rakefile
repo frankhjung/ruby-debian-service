@@ -7,18 +7,10 @@ require 'rubocop/rake_task'
 
 require_relative 'lib/builder'
 require_relative 'lib/packager'
+require_relative 'lib/publisher'
 
-# Build Debian application package.
-#
-# * the service is called fhj-timer (based of /etc/init.d/skeleton)
-# * the script is called fhj-timer.sh
-#
-# To build CentOS package and service read
-#
-# * http://www.cyberciti.biz/tips/linux-write-sys-v-init-script-to-start-stop-service.html
-# * http://www.linux.com/learn/tutorials/442412-managing-linux-daemons-with-init-scripts
-
-VERSION = '0.3.0'
+# if snapshot, mimic publishing artifacts
+VERSION = 'SNAPSHOT'
 
 task default: [:help]
 task cleanall: [:clean, :clobber]
@@ -27,6 +19,12 @@ task all: [:clean, :clobber, :check, :package, :doc]
 desc 'Show help'
 task :help do
   puts <<HELP
+The main goals are
+
+  * build - build target files from templates
+  * package - create RPM package from targets
+  * publish - upload RPM packages to WebDAV
+
 For Rakefile help call:
 
   rake -D
@@ -34,6 +32,9 @@ For Rakefile help call:
 Or
 
   rake -T
+To show Ruby environment use:
+
+  go.sh info
 
 To cleanup unused Gems use:
 
@@ -47,38 +48,51 @@ Version:
 
   #{VERSION}
 HELP
+  # can also get more help on FPM with
   # system 'fpm --help'
 end
 
 desc 'Generate target files from source and templates'
-task build: :clean do
-  builder = Builder.new
-  Dir.glob 'src/main/config/*' do |d|
-    @config = File.basename d
-    puts "Building for #{@config} ..."
-    properties_file = File.expand_path "src/main/config/#{@config}/debian-service.properties"
-    service_file = File.expand_path "target/#{@config}/etc/init.d/fhj-timer"
-    builder.copy_file(Builder::SERVICE, service_file)
-    script_file = File.expand_path "target/#{@config}/opt/app/fhj-timer.sh"
-    builder.from_template(Builder::SCRIPT, script_file, properties_file)
-    postinstall_file = File.expand_path "target/#{@config}/postinstall"
-    builder.from_template(Builder::POST_INSTALL_ERB, postinstall_file, properties_file)
+task build: [:clean, :check] do
+  Dir.glob 'src/main/env/*' do |env|
+    builder = Builder.new
+    @environment = File.basename env
+    puts "Building #{@environment} ..."
+    builder.build @environment
   end
 end
 
-desc 'Create Debian package using command line fpm'
-task package: :build do
-  packager = Packager.new
-  packager.version = VERSION
-  Dir.glob 'src/main/config/*' do |d|
-    packager.iteration = File.basename d
-    packager.preinstall = Builder::PRE_INSTALL
-    packager.postinstall = File.expand_path "target/#{packager.iteration}/postinstall"
-    packager.preuninstall = Builder::PRE_UNINSTALL
-    packager.changedir = File.expand_path "target/#{packager.iteration}"
-    packager.pack
+desc 'Check project syntax with RuboCop'
+RuboCop::RakeTask.new(:check) do |task|
+  # run standard syntax check first
+  ruby '-c Rakefile lib/*.rb'
+  # files to check
+  task.patterns = ['Rakefile', 'lib/*.rb']
+  # report format: simple, progress, files, offenses, clang, disabled
+  task.formatters = ['progress']
+  # continue on finding errors
+  task.fail_on_error = false
+  # show it working
+  task.verbose = true
+end
+
+desc 'package installation files for each environment'
+task :package do
+  Dir.glob 'target/*' do |env|
+    packager = Packager.new
+    environment = File.basename env
+    next if environment == '_local'
+    packager.pack(VERSION, environment)
     fail "ERROR: could not create package #{packager.name}" unless packager.check
-    FileUtils.mv packager.name, 'target'
+    FileUtils.mv(packager.name, 'target')
+  end
+end
+
+desc 'Publish build artifacts to webdav server'
+task :publish do
+  Dir.glob('target/*.deb').each do |deb|
+    publisher = Publisher.new
+    publisher.publish(VERSION, deb)
   end
 end
 
@@ -104,26 +118,13 @@ task :bundles do
   system 'bundle list --verbose'
 end
 
-desc 'Check project syntax with RuboCop'
-RuboCop::RakeTask.new(:check) do |task|
-  # run standard syntax check first
-  # ruby "-c #{srcs}"
-  # files to check
-  task.patterns = ['Rakefile', 'lib/*.rb']
-  # report format: simple, progress, files, offenses, clang, disabled
-  task.formatters = ['simple']
-  # continue on finding errors
-  task.fail_on_error = false
-  # show it working
-  task.verbose = true
-end
-
 desc 'Document project'
 RDoc::Task.new(:doc) do |task|
   task.main = 'README'
   task.options << '--all'
   task.rdoc_dir = 'doc'
   task.rdoc_files.include('Rakefile')
+  task.rdoc_files.include('lib/*.rb')
   task.rdoc_files.include('README.rdoc')
   task.rdoc_files.include('CHANGES')
   task.rdoc_files.include('LICENSE')

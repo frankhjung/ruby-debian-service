@@ -2,6 +2,7 @@
 # coding: utf-8
 
 require 'erb'
+
 require_relative 'properties'
 
 # Build uses a template and properties to generate a target file.
@@ -9,18 +10,29 @@ require_relative 'properties'
 # Author:: Frank Jung
 # License:: see LICENSE
 class Builder
+  # target application directory on server
+  APP_DIR = 'opt/fhj'
   # path to init.d service
   SERVICE = File.expand_path 'src/main/resources/fhj-timer-service.sh'
   # path to script run by service (templated)
-  SCRIPT = File.expand_path 'src/main/resources/fhj-timer-script.sh.erb'
-  # path to configuration properties
-  CONFIG_DIR = File.expand_path 'src/main/config'
+  SCRIPT_ERB = File.expand_path 'src/main/resources/fhj-timer-script.sh.erb'
   # pre-installation script
   PRE_INSTALL = File.expand_path 'src/main/resources/preinstall'
   # post-installation script (templated)
   POST_INSTALL_ERB = File.expand_path 'src/main/resources/postinstall.erb'
   # pre-un-installation script
   PRE_UNINSTALL = File.expand_path 'src/main/resources/preuninstall'
+
+  # Build files for a specific environment
+  def build(env)
+    properties_file = File.expand_path "src/main/env/#{env}/debian-service.properties"
+    service_file = File.expand_path "target/#{env}/etc/init.d/fhj-timer"
+    copy_file(SERVICE, service_file)
+    script_file = File.expand_path "target/#{env}/#{APP_DIR}/fhj-timer.sh"
+    from_template(SCRIPT_ERB, script_file, properties_file)
+    postinstall_file = File.expand_path "target/#{env}/postinstall"
+    from_template(POST_INSTALL_ERB, postinstall_file, properties_file)
+  end
 
   # Copy file as is from source to target.
   def copy_file(source_file, target_file)
@@ -29,8 +41,7 @@ class Builder
     FileUtils.cp source_file, target_file
   end
 
-  # Build from a template.
-  # Preserves file modes
+  # Build from a template, while preserving file modes.
   def from_template(source_file, target_file, properties_file)
     fail "ERROR: #{source_file} not a file" unless File.file?(source_file)
     FileUtils.mkdir_p(File.dirname(target_file))

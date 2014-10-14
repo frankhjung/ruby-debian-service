@@ -16,14 +16,11 @@ class Properties
   end
 
   # expose private ERB binding method.
-  def get_binding
+  def erb_binding
     binding
   end
 
-  # alias_method :get_binding, :binding
-  # ERROR: this does not work. Throws error:
-  # rake aborted!
-  # SystemStackError: stack level too deep
+  alias_method :get_binding, :erb_binding
 
   private
 
