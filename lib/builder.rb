@@ -46,7 +46,8 @@ class Builder
     fail "ERROR: #{source_file} not a file" unless File.file?(source_file)
     FileUtils.mkdir_p(File.dirname(target_file))
     source = File.read(source_file)
-    properties = Properties.new(properties_file)
+    properties = Properties.new
+    properties.parse(properties_file)
     renderer = ERB.new(source)
     File.write(target_file, renderer.result(properties.get_binding))
     s = File.stat(source_file)

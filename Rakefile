@@ -1,6 +1,5 @@
 # coding: utf-8
 
-require 'fpm'
 require 'rake/clean'
 require 'rdoc/task'
 require 'rubocop/rake_task'
@@ -45,6 +44,7 @@ Version:
 
   #{VERSION}
 HELP
+  # require 'fpm'
   # can also get more help on FPM with
   # system 'fpm --help'
 end
@@ -56,14 +56,11 @@ desc 'Check project syntax with RuboCop'
 RuboCop::RakeTask.new(:check) do |task|
   # run standard syntax check first
   ruby '-c Rakefile lib/*.rb'
-  # files to check
-  task.patterns = ['Rakefile', 'lib/*.rb']
   # report format: simple, progress, files, offenses, clang, disabled
+  task.patterns = ['Rakefile', 'lib/*.rb']
+  task.fail_on_error = true
   task.formatters = ['progress']
-  # continue on finding errors
-  task.fail_on_error = false
-  # show it working
-  task.verbose = true
+  task.verbose = false
 end
 
 desc 'Generate target files from source and templates'
@@ -114,7 +111,7 @@ desc 'Install bundles'
 task :bundles do
   system 'bundle check'
   system 'bundle install'
-  # system 'bundle update'
+  system 'bundle update'
   system 'bundle list --verbose'
 end
 

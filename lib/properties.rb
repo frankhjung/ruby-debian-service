@@ -9,26 +9,12 @@ class Properties
   # binding for ERB
   attr_accessor :properties
 
-  # Default constructor
-  def initialize(file)
-    @properties = {}
-    _parse(file)
-  end
-
-  # expose private ERB binding method.
-  def erb_binding
-    binding
-  end
-
-  alias_method :get_binding, :erb_binding
-
-  private
-
   # Parse a properties file
   #
   # * Load cleansed lines into an array
   # * Load key values into a hash
-  def _parse(file)
+  def parse(file)
+    @properties = {}
     fail unless File.file?(file)
     IO.foreach(file) do |line|
       work = line.strip
@@ -42,6 +28,15 @@ class Properties
       end
     end
   end
+
+  # expose private ERB binding method.
+  def erb_binding
+    binding
+  end
+
+  alias_method :get_binding, :erb_binding
+
+  private
 
   # write only valid properties to list and hash
   def _append(key, value)
