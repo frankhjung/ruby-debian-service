@@ -125,6 +125,7 @@ RDoc::Task.new(:doc) do |task|
   task.rdoc_files.include('lib/*.rb')
   task.rdoc_files.include('README.rdoc')
   task.rdoc_files.include('CHANGES')
+  task.rdoc_files.include('TODO')
   task.rdoc_files.include('LICENSE')
   # task.rdoc_files.include('VERSION')
   task.title = ENV['title'] || 'Ruby example to generate a Debian package'

@@ -1,0 +1,4 @@
+* add git task to report commits for CHANGES log
+* build one deb package
+    * ignore local?
+    * add config into package and manage at installation (removing unwanted configs)
