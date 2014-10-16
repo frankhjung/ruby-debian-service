@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/sh
 ### BEGIN INIT INFO
 # Provides:          fhj-timer
 # Required-Start:    $remote_fs $syslog
@@ -22,7 +22,7 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Description of the service"
 NAME=fhj-timer.sh
-DAEMON=/opt/app/fhj/$NAME
+DAEMON=/opt/fhj/$NAME
 DAEMON_ARGS=
 SCRIPTNAME=/etc/init.d/fhj-timer
 VERBOSE=yes

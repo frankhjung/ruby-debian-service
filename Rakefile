@@ -9,7 +9,7 @@ require_relative 'lib/packager'
 require_relative 'lib/publisher'
 
 # if snapshot, mimic publishing artifacts
-VERSION = 'SNAPSHOT'
+VERSION = ENV['VERSION'] || 'SNAPSHOT'
 
 task default: [:help]
 task cleanall: [:clean, :clobber]
@@ -49,7 +49,7 @@ HELP
   # system 'fpm --help'
 end
 
-CLEAN.include('fhj-timer*.deb', 'target/*.deb')
+CLEAN.include('fhj-timer*.deb')
 CLOBBER.include('doc/', 'target/', '**/*.bak', '**/*~')
 
 desc 'Check project syntax with RuboCop'
@@ -64,21 +64,21 @@ RuboCop::RakeTask.new(:check) do |task|
 end
 
 desc 'Generate target files from source and templates'
-task :build do
-  Dir.glob 'src/main/env/*' do |env|
+task build: :clean do
+  Dir.glob 'src/main/config/*' do |env|
     builder = Builder.new
-    @environment = File.basename env
-    puts "Building #{@environment} ..."
-    builder.build @environment
+    environment = (File.basename env)[/^([^.]*).properties/, 1]
+    puts "Building #{environment} ..."
+    builder.build environment
   end
 end
 
 desc 'package installation files for each environment'
 task :package do
-  Dir.glob 'target/*' do |env|
+  Dir.glob 'target/*/' do |env|
     packager = Packager.new
     environment = File.basename env
-    next if environment == '_local'
+    puts "Packaging #{environment} ..."
     packager.pack(VERSION, environment)
     fail "ERROR: could not create package #{packager.name}" unless packager.check
     FileUtils.mv(packager.name, 'target')
@@ -88,6 +88,7 @@ end
 desc 'Publish build artifacts to webdav server'
 task :publish do
   Dir.glob('target/*.deb').each do |deb|
+    puts "Publishing #{deb} ..."
     publisher = Publisher.new
     publisher.publish(VERSION, deb)
   end

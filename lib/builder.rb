@@ -25,7 +25,7 @@ class Builder
 
   # Build files for a specific environment
   def build(env)
-    properties_file = File.expand_path "src/main/env/#{env}/debian-service.properties"
+    properties_file = File.expand_path "src/main/config/#{env}.properties"
     service_file = File.expand_path "target/#{env}/etc/init.d/fhj-timer"
     copy_file(SERVICE, service_file)
     script_file = File.expand_path "target/#{env}/#{APP_DIR}/fhj-timer.sh"
@@ -44,6 +44,7 @@ class Builder
   # Build from a template, while preserving file modes.
   def from_template(source_file, target_file, properties_file)
     fail "ERROR: #{source_file} not a file" unless File.file?(source_file)
+    fail "ERROR: #{properties_file} not a file" unless File.file?(properties_file)
     FileUtils.mkdir_p(File.dirname(target_file))
     source = File.read(source_file)
     properties = Properties.new
