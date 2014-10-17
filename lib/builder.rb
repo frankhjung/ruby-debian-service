@@ -10,7 +10,9 @@ require_relative 'properties'
 # Author:: Frank Jung
 # License:: see LICENSE
 class Builder
-  # target application directory on server
+  # application name
+  APP_NAME = 'fhj-timer'
+  # application target directory on server
   APP_DIR = 'opt/fhj'
   # path to init.d service
   SERVICE = File.expand_path 'src/main/resources/fhj-timer-service.sh'
@@ -26,32 +28,32 @@ class Builder
   # Build files for a specific environment
   def build(env)
     properties_file = File.expand_path "src/main/config/#{env}.properties"
-    service_file = File.expand_path "target/#{env}/etc/init.d/fhj-timer"
-    copy_file(SERVICE, service_file)
-    script_file = File.expand_path "target/#{env}/#{APP_DIR}/fhj-timer.sh"
-    from_template(SCRIPT_ERB, script_file, properties_file)
+    service_file = File.expand_path "target/#{env}/etc/init.d/#{APP_NAME}"
+    copy_file SERVICE, service_file
+    script_file = File.expand_path "target/#{env}/#{APP_DIR}/#{APP_NAME}.sh"
+    from_template SCRIPT_ERB, script_file, properties_file
     postinstall_file = File.expand_path "target/#{env}/postinstall"
-    from_template(POST_INSTALL_ERB, postinstall_file, properties_file)
+    from_template POST_INSTALL_ERB, postinstall_file, properties_file
   end
 
   # Copy file as is from source to target.
   def copy_file(source_file, target_file)
-    fail "ERROR: #{source_file} not a file" unless File.file?(source_file)
-    FileUtils.mkdir_p(File.dirname(target_file))
+    fail "ERROR: #{source_file} not a file" unless File.file? source_file
+    FileUtils.mkdir_p File.dirname target_file
     FileUtils.cp source_file, target_file
   end
 
   # Build from a template, while preserving file modes.
   def from_template(source_file, target_file, properties_file)
-    fail "ERROR: #{source_file} not a file" unless File.file?(source_file)
-    fail "ERROR: #{properties_file} not a file" unless File.file?(properties_file)
-    FileUtils.mkdir_p(File.dirname(target_file))
-    source = File.read(source_file)
+    fail "ERROR: #{source_file} not a file" unless File.file? source_file
+    fail "ERROR: #{properties_file} not a file" unless File.file? properties_file
+    FileUtils.mkdir_p File.dirname(target_file)
+    source = File.read source_file
     properties = Properties.new
-    properties.parse(properties_file)
+    properties.parse properties_file
     renderer = ERB.new(source)
-    File.write(target_file, renderer.result(properties.get_binding))
-    s = File.stat(source_file)
-    File.chmod(s.mode, target_file)
+    File.write target_file, renderer.result(properties.get_binding)
+    s = File.stat source_file
+    File.chmod s.mode, target_file
   end
 end
