@@ -82,7 +82,7 @@ class Packager
 
   # Returns the environment given a package name
   def self.environment(package)
-    # "ib2b-ax-servicelimiter-trigger-#{@version}-#{@iteration}.noarch.rpm"
+    # "fhj-timer_[version]-[environment]_all.deb"
     (package.strip)[/.*-([^.-]*)_all\.deb/, 1]
   end
 
