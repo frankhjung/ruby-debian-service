@@ -65,7 +65,8 @@ end
 
 desc 'Generate target files from source and templates'
 task build: :clean do
-  Dir.glob 'src/main/config/*' do |env|
+  Dir.glob 'src/main/config/*.properties' do |env|
+    next unless File.file? env
     builder = Builder.new
     environment = (File.basename env)[/^([^.]*).properties/, 1]
     puts "Building #{environment} ..."
@@ -75,7 +76,8 @@ end
 
 desc 'package installation files for each environment'
 task :package do
-  Dir.glob 'target/*/' do |env|
+  Dir.glob 'target/*' do |env|
+    next unless File.directory? env
     packager = Packager.new
     environment = File.basename env
     puts "Packaging #{environment} ..."
@@ -88,6 +90,7 @@ end
 desc 'Publish build artifacts to webdav server'
 task :publish do
   Dir.glob('target/*.deb').each do |deb|
+    next unless File.file? deb
     puts "Publishing #{deb} ..."
     publisher = Publisher.new
     publisher.publish(VERSION, deb)
