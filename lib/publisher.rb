@@ -60,7 +60,7 @@ class Publisher
 
   # Recursively create directories
   def _create_directory(uri)
-    return if (SNAPSHOT == version)
+    return if SNAPSHOT == version
     puts "Creating #{uri} ..."
     Net::HTTP.start(uri.host, uri.port) do |http|
       response = http.mkcol uri.path
@@ -76,10 +76,11 @@ class Publisher
   end
 
   # Upload a single file (source) to target URI
+  # rubocop:disable Metrics/AbcSize
   def _upload_file(file, target)
     uri = URI.join(target, File.basename(file))
     puts "Upload from #{file}\nUpload to #{uri}"
-    return if (SNAPSHOT == @version)
+    return if SNAPSHOT == @version
     Net::HTTP.start(uri.host, uri.port) do |http|
       response = File.open(file) do |fp|
         request = Net::HTTP::Put.new(uri.path)

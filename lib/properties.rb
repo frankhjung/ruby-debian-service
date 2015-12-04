@@ -20,9 +20,9 @@ class Properties
       work = line.strip
       if work.empty?
         next
-      elsif '#' == work[0] then
+      elsif '#' == work[0]
         next
-      elsif work.include? '=' then
+      elsif work.include? '='
         k, v = work.split('=')
         _append k, v
       end

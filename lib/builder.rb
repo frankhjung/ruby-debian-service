@@ -44,6 +44,7 @@ class Builder
   end
 
   # Build from a template, while preserving file modes.
+  # rubocop:disable Metrics/AbcSize
   def from_template(source_file, target_file, properties_file)
     fail "ERROR: #{source_file} not a file" unless File.file? source_file
     fail "ERROR: #{properties_file} not a file" unless File.file? properties_file
