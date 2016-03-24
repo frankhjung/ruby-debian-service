@@ -27,6 +27,7 @@ class Packager
                   '--pre-uninstall <%= @preuninstall %>',
                   '--category Utility',
                   '--vendor frankhjung',
+                  '--license http://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html',
                   '-m frankhjung@linux.com',
                   '--url "http://frankhjung.blogspot.com.au/"',
                   '-C <%= @changedir %>',
