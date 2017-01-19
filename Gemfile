@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
 
-gem 'fpm', '~>1.4'
+gem 'fpm', '~>1.8'
 gem 'rake', '~>10.4'
-gem 'rubocop', '~>0.35'
+gem 'rubocop', '~>0.47'

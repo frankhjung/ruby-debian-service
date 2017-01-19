@@ -2,6 +2,13 @@
 
 ==HEAD
 
+==0.6.0
+
+* remove rvmrc in preference to version conf
+* upgrade to ruby 2.3.3
+* clean-up build and Rakefile
+* upgrade gem versions
+
 * update build to use rvmrc
 * updated gem versions
 * fixed new rubocop warnings

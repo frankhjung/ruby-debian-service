@@ -1,5 +1,4 @@
 #!/usr/bin/env ruby
-# coding: utf-8
 
 require 'erb'
 
@@ -11,9 +10,9 @@ require_relative 'properties'
 # License:: see LICENSE
 class Builder
   # application name
-  APP_NAME = 'fhj-timer'
+  APP_NAME = 'fhj-timer'.freeze
   # application target directory on server
-  APP_DIR = 'opt/fhj'
+  APP_DIR = 'opt/fhj'.freeze
   # path to init.d service
   SERVICE = File.expand_path 'src/main/resources/fhj-timer-service.sh'
   # path to script run by service (templated)
@@ -38,7 +37,7 @@ class Builder
 
   # Copy file as is from source to target.
   def copy_file(source_file, target_file)
-    fail "ERROR: #{source_file} not a file" unless File.file? source_file
+    raise "ERROR: #{source_file} not a file" unless File.file? source_file
     FileUtils.mkdir_p File.dirname target_file
     FileUtils.cp source_file, target_file
   end
@@ -46,8 +45,8 @@ class Builder
   # Build from a template, while preserving file modes.
   # rubocop:disable Metrics/AbcSize
   def from_template(source_file, target_file, properties_file)
-    fail "ERROR: #{source_file} not a file" unless File.file? source_file
-    fail "ERROR: #{properties_file} not a file" unless File.file? properties_file
+    raise "ERROR: #{source_file} not a file" unless File.file? source_file
+    raise "ERROR: #{properties_file} not a file" unless File.file? properties_file
     FileUtils.mkdir_p File.dirname(target_file)
     source = File.read source_file
     properties = Properties.new

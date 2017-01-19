@@ -1,5 +1,3 @@
-# coding: utf-8
-
 require 'rake/clean'
 require 'rdoc/task'
 require 'rubocop/rake_task'
@@ -15,52 +13,69 @@ task default: [:help]
 task cleanall: [:clean, :clobber]
 task all: [:cleanall, :check, :build, :package, :publish, :doc]
 
+tests = FileList.new('tests/test_*.rb')
+srcs = FileList.new('lib/*.rb')
+
 desc 'Show help'
 task :help do
   puts <<HELP
+For Rakefile help call:
+  rake -D
+Or
+  rake -T
+
+To cleanup unused Gems use:
+  bundle clean --force -V
+
 The main goals are:
 
-  * build - build target files from templates
+* build - build target files from templates
   * package - create Debian package from targets
   * publish - upload Debian packages to WebDAV
 
-For Rakefile help call:
+* FPM
+  * install fpm gem
+  * can also get more help on FPM with system 'fpm --help'
 
-  rake [-D|-T]
-
-To show Ruby environment use:
-
-  go.sh info
-
-To cleanup unused Gems use:
-
-  bundle clean --force -V
-
-To show gemsets use:
-
-  rvm gemset list
-
-Version:
-
-  #{VERSION}
+Version: 
+  #{VERSION}  
 HELP
-  # require 'fpm'
-  # can also get more help on FPM with
-  # system 'fpm --help'
 end
 
-CLEAN.include('fhj-timer*.deb')
-CLOBBER.include('doc/', 'target/', '**/*.bak', '**/*~')
+desc 'Show bundle and Gem information'
+task :info do
+  # showing RVM information:
+  system 'rvm info'
+  # system 'rvm list'
+  # showing Gem information:
+  # system 'gem list --local'
+  system 'gem environment'
+  # showing bundle information
+  system 'bundle list'
+  puts 'Showing stale gems:'
+  system 'gem stale'
+end
+
+desc 'Install bundles'
+task :bundles do
+  system 'bundle check'
+  system 'bundle install'
+  # system 'bundle update'
+  system 'bundle list --verbose'
+end
 
 desc 'Check project syntax with RuboCop'
 RuboCop::RakeTask.new(:check) do |task|
   # run standard syntax check first
-  ruby '-c Rakefile lib/*.rb'
+  # ruby "-c #{srcs}"
+  # files to check
+  task.patterns = ['Rakefile'] + srcs + tests
   # report format: simple, progress, files, offenses, clang, disabled
-  task.patterns = ['Rakefile', 'lib/*.rb']
-  task.fail_on_error = true
-  task.formatters = ['progress']
-  task.verbose = false
+  task.formatters = ['simple']
+  # continue on finding errors
+  task.fail_on_error = false
+  # show it working
+  task.verbose = true
 end
 
 desc 'Generate target files from source and templates'
@@ -82,7 +97,7 @@ task :package do
     environment = File.basename env
     puts "Packaging #{environment} ..."
     packager.pack(VERSION, environment)
-    fail "ERROR: could not create package #{packager.name}" unless packager.check
+    raise "ERROR: could not create package #{packager.name}" unless packager.check
     FileUtils.mv(packager.name, 'target')
   end
 end
@@ -95,28 +110,6 @@ task :publish do
     publisher = Publisher.new
     publisher.publish(VERSION, deb)
   end
-end
-
-desc 'Show bundle and Gem information'
-task :info do
-  # showing RVM information:
-  system 'rvm info'
-  # system 'rvm list'
-  # showing Gem information:
-  # system 'gem list --local'
-  system 'gem environment'
-  # showing bundle information
-  system 'bundle list'
-  puts 'Showing stale gems:'
-  system 'gem stale'
-end
-
-desc 'Install bundles'
-task :bundles do
-  system 'bundle check'
-  system 'bundle install'
-  system 'bundle update'
-  system 'bundle list --verbose'
 end
 
 desc 'Document project'
@@ -133,3 +126,17 @@ RDoc::Task.new(:doc) do |task|
   # task.rdoc_files.include('VERSION')
   task.title = ENV['title'] || 'Ruby example to generate a Debian package'
 end
+
+desc 'Check project syntax with RuboCop'
+RuboCop::RakeTask.new(:check) do |task|
+  # run standard syntax check first
+  ruby '-c Rakefile lib/*.rb'
+  # report format: simple, progress, files, offenses, clang, disabled
+  task.patterns = ['Rakefile', 'lib/*.rb']
+  task.fail_on_error = true
+  task.formatters = ['progress']
+  task.verbose = false
+end
+
+CLEAN.include('fhj-timer*.deb')
+CLOBBER.include('doc/', 'target/', '**/*.bak', '**/*~')

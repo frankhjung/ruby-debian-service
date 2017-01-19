@@ -1,5 +1,4 @@
 #!/usr/bin/ruby
-# coding: utf-8
 
 require 'net/http'
 require 'uri'
@@ -14,13 +13,13 @@ require_relative 'packager'
 # License:: see LICENSE
 class Publisher
   # Name of project to publish
-  PROJECT_NAME = 'fhj-timer'
+  PROJECT_NAME = 'fhj-timer'.freeze
   # WebDAV host
-  REMOTE_HOST = 'http://localhost'
+  REMOTE_HOST = 'http://localhost'.freeze
   # base directory on WebDAV host
-  REMOTE_BASEDIR = 'artifact-repository/fhj/'
+  REMOTE_BASEDIR = 'artifact-repository/fhj/'.freeze
   # Do not perform actions if this is a development build
-  SNAPSHOT = 'SNAPSHOT'
+  SNAPSHOT = 'SNAPSHOT'.freeze
 
   # publish this version of the artifact (ignore snapshots)
   attr_accessor :version
@@ -66,7 +65,7 @@ class Publisher
       response = http.mkcol uri.path
       case response
       when Net::HTTPSuccess, Net::HTTPRedirection
-        # ok
+        break
       else
         puts response.to_hash.inspect
         puts response.body
@@ -90,7 +89,7 @@ class Publisher
       end
       case response
       when Net::HTTPSuccess
-        # ok
+        break
       else
         puts response.to_hash.inspect
         puts response.body

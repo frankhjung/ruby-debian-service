@@ -7,4 +7,5 @@
 #   set -v
 
 # run rake with parameters
-bundle exec rake -f Rakefile $@
+# bundle exec rake -f Rakefile $@
+rake -f Rakefile $@

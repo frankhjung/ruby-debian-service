@@ -1,5 +1,4 @@
 #!/usr/bin/env ruby
-# coding: utf-8
 
 # Load a properties file into a hash.
 #
@@ -15,14 +14,12 @@ class Properties
   # * Load key values into a hash
   def parse(file)
     @properties = {}
-    fail unless File.file?(file)
+    raise unless File.file?(file)
     IO.foreach(file) do |line|
       work = line.strip
-      if work.empty?
-        next
-      elsif '#' == work[0]
-        next
-      elsif work.include? '='
+      next if work.empty?
+      next if '#' == work[0]
+      if work.include? '='
         k, v = work.split('=')
         _append k, v
       end
@@ -34,7 +31,7 @@ class Properties
     binding
   end
 
-  alias_method :get_binding, :erb_binding
+  alias get_binding erb_binding
 
   private
 
@@ -42,7 +39,7 @@ class Properties
   def _append(key, value)
     return unless key
     k = key.strip
-    return unless k.length > 0
+    return if k.empty?
     v = value ? value.strip : ''
     @properties[k] = v
   end

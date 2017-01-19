@@ -1,5 +1,4 @@
 #!/usr/bin/env ruby
-# coding: utf-8
 
 require 'erb'
 require_relative 'builder'
@@ -32,11 +31,10 @@ class Packager
                   '--url "http://frankhjung.blogspot.com.au/"',
                   '-C <%= @changedir %>',
                   'etc/init.d',
-                  'opt/fhj'
-                 ]
+                  'opt/fhj'].freeze
 
   # command to check package creation
-  CHECK_TEMPLATE = 'dpkg -I <%= name %>'
+  CHECK_TEMPLATE = 'dpkg -I <%= name %>'.freeze
 
   # binding for ERB - base directory to get artifacts
   attr_accessor :changedir
@@ -70,8 +68,8 @@ class Packager
 
   # Returns with the expected package name
   def name
-    fail 'ERROR: no version supplied' unless @version
-    fail 'ERROR: no iteration supplied' unless @iteration
+    raise 'ERROR: no version supplied' unless @version
+    raise 'ERROR: no iteration supplied' unless @iteration
     "fhj-timer_#{@version}-#{@iteration}_all.deb"
   end
 
@@ -84,7 +82,7 @@ class Packager
   # Returns the environment given a package name
   def self.environment(package)
     # "fhj-timer_[version]-[environment]_all.deb"
-    (package.strip)[/.*-([^.-]*)_all\.deb/, 1]
+    package.strip[/.*-([^.-]*)_all\.deb/, 1]
   end
 
   private
@@ -94,6 +92,6 @@ class Packager
     renderer = ERB.new(FPM_TEMPLATE.join(' '))
     fpm_command = renderer.result(binding)
     rc = system fpm_command
-    fail 'ERROR: could not create package' unless rc
+    raise 'ERROR: could not create package' unless rc
   end
 end
