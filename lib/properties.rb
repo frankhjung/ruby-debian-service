@@ -18,7 +18,7 @@ class Properties
     IO.foreach(file) do |line|
       work = line.strip
       next if work.empty?
-      next if '#' == work[0]
+      next if work[0] == '#'
       if work.include? '='
         k, v = work.split('=')
         _append k, v

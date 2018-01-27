@@ -2,6 +2,12 @@
 
 ==HEAD
 
+==0.7.0
+
+* update gems
+* enable rubocop
+* fixed rubocop warnings
+
 ==0.6.0
 
 * remove rvmrc in preference to version conf

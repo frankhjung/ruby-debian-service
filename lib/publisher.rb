@@ -75,26 +75,35 @@ class Publisher
   end
 
   # Upload a single file (source) to target URI
-  # rubocop:disable Metrics/AbcSize
   def _upload_file(file, target)
     uri = URI.join(target, File.basename(file))
     puts "Upload from #{file}\nUpload to #{uri}"
     return if SNAPSHOT == @version
     Net::HTTP.start(uri.host, uri.port) do |http|
       response = File.open(file) do |fp|
-        request = Net::HTTP::Put.new(uri.path)
-        request.content_length = File.size(file)
-        request.body_stream = fp
-        http.request(request)
+        _request(uri, file, fp, http)
       end
       case response
       when Net::HTTPSuccess
         break
       else
-        puts response.to_hash.inspect
-        puts response.body
-        response.error!
+        _response(response)
       end
     end
+  end
+
+  # manage request
+  def _request(uri, file, fp, http)
+    request = Net::HTTP::Put.new(uri.path)
+    request.content_length = File.size(file)
+    request.body_stream = fp
+    http.request(request)
+  end
+
+  # manage response
+  def _response(response)
+    puts response.to_hash.inspect
+    puts response.body
+    response.error!
   end
 end

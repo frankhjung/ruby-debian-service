@@ -9,9 +9,9 @@ require_relative 'lib/publisher'
 # if snapshot, mimic publishing artifacts
 VERSION = ENV['VERSION'] || 'SNAPSHOT'
 
-task default: [:help]
-task cleanall: [:clean, :clobber]
-task all: [:cleanall, :check, :build, :package, :publish, :doc]
+task default: %i[help]
+task cleanall: %i[clean clobber]
+task all: %i[cleanall check build package publish doc]
 
 tests = FileList.new('tests/test_*.rb')
 srcs = FileList.new('lib/*.rb')
@@ -19,26 +19,26 @@ srcs = FileList.new('lib/*.rb')
 desc 'Show help'
 task :help do
   puts <<HELP
-For Rakefile help call:
-  rake -D
-Or
-  rake -T
+  For Rakefile help call:
+    rake -D
+  Or
+    rake -T
 
-To cleanup unused Gems use:
-  bundle clean --force -V
+  To cleanup unused Gems use:
+    bundle clean --force -V
 
-The main goals are:
+  The main goals are:
 
-* build - build target files from templates
-  * package - create Debian package from targets
-  * publish - upload Debian packages to WebDAV
+  * build - build target files from templates
+    * package - create Debian package from targets
+    * publish - upload Debian packages to WebDAV
 
-* FPM
-  * install fpm gem
-  * can also get more help on FPM with system 'fpm --help'
+  * FPM
+    * install fpm gem
+    * can also get more help on FPM with system 'fpm --help'
 
-Version: 
-  #{VERSION}  
+  Version:
+    #{VERSION}
 HELP
 end
 

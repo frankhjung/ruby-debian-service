@@ -43,16 +43,23 @@ class Builder
   end
 
   # Build from a template, while preserving file modes.
-  # rubocop:disable Metrics/AbcSize
   def from_template(source_file, target_file, properties_file)
     raise "ERROR: #{source_file} not a file" unless File.file? source_file
     raise "ERROR: #{properties_file} not a file" unless File.file? properties_file
+    _from_template(source_file, target_file, properties_file)
+    _set_permissions(source_file, target_file)
+  end
+
+  def _from_template(source_file, target_file, properties_file)
     FileUtils.mkdir_p File.dirname(target_file)
     source = File.read source_file
     properties = Properties.new
     properties.parse properties_file
     renderer = ERB.new(source)
     File.write target_file, renderer.result(properties.get_binding)
+  end
+
+  def _set_permissions(source_file, target_file)
     s = File.stat source_file
     File.chmod s.mode, target_file
   end
